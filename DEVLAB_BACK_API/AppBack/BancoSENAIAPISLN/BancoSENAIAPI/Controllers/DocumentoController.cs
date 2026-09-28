@@ -56,7 +56,7 @@ namespace BancoSENAIAPI.Controllers
             var documentoMetadados = new Models.DocumentoMetadado
             {
                 Id = _nextId,
-                Name = nomeOriginal,
+                Nome = nomeOriginal,
                 Extensao = extensao,
                 Caminho = caminhoFinal,
                 CodigoCliente = codigoCliente,
@@ -95,7 +95,7 @@ namespace BancoSENAIAPI.Controllers
 
             byte[] fileBytes = System.IO.File.ReadAllBytes(documento.Caminho);
 
-            return File(fileBytes, "application/octet-stream", documento.Name);
+            return File(fileBytes, "application/octet-stream", documento.Nome);
         }
 
         [HttpDelete("excluir/{id}")]

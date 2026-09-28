@@ -1,5 +1,7 @@
-﻿using BancoSENAIAPI.Models;
+﻿using BancoSENAIAPI.Data;
+using BancoSENAIAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BancoSENAIAPI.Controllers
 {
@@ -7,21 +9,23 @@ namespace BancoSENAIAPI.Controllers
     [Route("api/v1/[controller]")]
     public class CarteiraController : ControllerBase
     {
-        private static List<Carteira> _carteiras = new List<Carteira>
+
+        private readonly AppDbContext _context;
+
+        public CarteiraController(AppDbContext context)
         {
-            new Carteira { NumeroCarteira = 0001, NomeCarteira = "Carteira01", ApetiteCarteira = 1000 },
-            new Carteira { NumeroCarteira = 0002, NomeCarteira = "Carteira02", ApetiteCarteira = 1000 },
-            new Carteira { NumeroCarteira = 0003, NomeCarteira = "Carteira03", ApetiteCarteira = 1000 }
-        };
+            _context = context;
+        }
 
         [HttpGet]
-        public IActionResult ListarTodas()
+        public async Task<IActionResult> ListarTodas()
         {
-            return Ok(_carteiras);
+            var carteiras = await _context.Carteira.ToListAsync();   
+            return Ok(carteiras);
         }
 
         [HttpPost]
-        public IActionResult Cadastrar([FromBody] Carteira novaCarteira)
+        public async Task<IActionResult> Cadastrar([FromBody] Carteira novaCarteira)
         {
 
             if (novaCarteira.ApetiteCarteira < 0)
@@ -29,17 +33,18 @@ namespace BancoSENAIAPI.Controllers
                 return BadRequest(new { message = "O valor do apetite carteira deve ser maior ou igual a zero." });
             }
 
-            if (_carteiras.Any(a => a.NumeroCarteira == novaCarteira.NumeroCarteira))
+            if (await _context.Carteira.AnyAsync(a => a.NumeroCarteira == novaCarteira.NumeroCarteira))
                 return BadRequest(new { message = "Este número de agência já existe." });
 
-            _carteiras.Add(novaCarteira);
+            await _context.Carteira.AddAsync(novaCarteira);
+            await _context.SaveChangesAsync();
             return Created("", novaCarteira);
         }
 
         [HttpGet("{codigo}")]
-        public IActionResult ConsultarPorCodigo(int codigo)
+        public async Task<IActionResult> ConsultarPorCodigo(int codigo)
         {
-            var Carteira = _carteiras.FirstOrDefault(a => a.NumeroCarteira == codigo);
+            var Carteira = await _context.Carteira.FirstOrDefaultAsync(a => a.NumeroCarteira == codigo);
 
             if (Carteira == null)
                 return NotFound(new { message = "Carteira não encontrada." });
@@ -48,7 +53,7 @@ namespace BancoSENAIAPI.Controllers
         }
 
         [HttpPut("{codigo}")]
-        public IActionResult Alterar(int codigo, [FromBody] Carteira CarteiraAtualizada)
+        public async Task<IActionResult> Alterar(int codigo, [FromBody] Carteira CarteiraAtualizada)
         {
            
             if (CarteiraAtualizada.ApetiteCarteira < 0)
@@ -56,7 +61,7 @@ namespace BancoSENAIAPI.Controllers
                 return BadRequest(new { message = "O valor do apetite carteira deve ser maior ou igual a zero." });
             }
 
-            var CarteiraExistente = _carteiras.FirstOrDefault(a => a.NumeroCarteira == codigo);
+            var CarteiraExistente = await _context.Carteira.FirstOrDefaultAsync(a => a.NumeroCarteira == codigo);
 
             if (CarteiraExistente == null) return NotFound();
 
@@ -64,17 +69,20 @@ namespace BancoSENAIAPI.Controllers
             CarteiraExistente.NomeCarteira = CarteiraAtualizada.NomeCarteira;
             CarteiraExistente.ApetiteCarteira = CarteiraAtualizada.ApetiteCarteira;
 
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 
         [HttpDelete("{codigo}")]
-        public IActionResult Excluir(int codigo)
+        public async Task<IActionResult> Excluir(int codigo)
         {
-            var Carteira = _carteiras.FirstOrDefault(a => a.NumeroCarteira == codigo);
+            var Carteira = await _context.Carteira.FirstOrDefaultAsync(a => a.NumeroCarteira == codigo);
 
             if (Carteira == null) return NotFound();
 
-            _carteiras.Remove(Carteira);
+            _context.Carteira.Remove(Carteira);
+            await _context.SaveChangesAsync();
             return Ok(new { message = "Carteira excluída com sucesso." });
         }
     }

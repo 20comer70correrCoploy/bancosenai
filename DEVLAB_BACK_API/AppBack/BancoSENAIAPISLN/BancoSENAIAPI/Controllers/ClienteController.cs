@@ -89,10 +89,10 @@ namespace BancoSENAIAPI.Controllers
             clienteExistente.Cpf = clienteAtualizado.Cpf;
             clienteExistente.NumeroAgencia = clienteAtualizado.NumeroAgencia <= 0 ? 10 : clienteAtualizado.NumeroAgencia;
             clienteExistente.SaldoTotal = clienteAtualizado.SaldoTotal;
-            clienteExistente.Sexo = clienteAtualizado.Sexo;
-            clienteExistente.Endereço = clienteAtualizado.Endereço;
+            /*clienteExistente.Sexo = clienteAtualizado.Sexo;
+            clienteExistente.Endereco = clienteAtualizado.Endereco;
             clienteExistente.cidade = clienteAtualizado.cidade;
-            clienteExistente.estado = clienteAtualizado.estado;
+            clienteExistente.estado = clienteAtualizado.estado;*/
 
             await _context.SaveChangesAsync();
 

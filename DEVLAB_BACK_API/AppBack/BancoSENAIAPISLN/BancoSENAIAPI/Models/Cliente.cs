@@ -14,14 +14,14 @@ namespace BancoSENAIAPI.Models
         public int NumeroAgencia { get; set; }
         [Required]
         public int SaldoTotal { get; set; }
+        /* [Required]
+        public required string Sexo { get; set; }
         [Required]
-        public required string Sexo {  get; set; }
+        public string Endereco { get; set; }
         [Required]
-        public required string Endereço { get; set; }
+        public string cidade { get; set; }
         [Required]
-        public required string cidade { get; set; }
-        [Required]
-        public required string estado { get; set;}
+        public required string estado { get; set; }*/
 
     }
 }

@@ -48,31 +48,50 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API Gestão Financeira e Integração Clientes."
     });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Informe apenas o token JWT"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+{
+    {
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+        },
+        Array.Empty<string>()
+    }
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("PermitirTudo",
-        policy => policy.AllowAnyOrigin() // Permite a 'origin null' do seu arquivo local
-                        .AllowAnyMethod() // Permite os verbos GET, POST, PUT, DELETE [2]
-                        .AllowAnyHeader()); // Permite o envio de JSON no corpo da mensagem [3]
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("PermitirTudo",
+            policy => policy.AllowAnyOrigin() // Permite a 'origin null' do seu arquivo local
+                            .AllowAnyMethod() // Permite os verbos GET, POST, PUT, DELETE [2]
+                            .AllowAnyHeader()); // Permite o envio de JSON no corpo da mensagem [3]
+    });
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseCors("PermitirTudo");
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 });
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseCors("PermitirTudo");
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
